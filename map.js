@@ -144,6 +144,14 @@ ${station.departures} departures
 ${station.arrivals} arrivals`;
 }
 
+function tooltipRows(station) {
+  return [
+    ["Total trips", station.totalTraffic],
+    ["Departures", station.departures],
+    ["Arrivals", station.arrivals],
+  ];
+}
+
 function stationDepartureRatio(station, stationFlow) {
   if (!station.totalTraffic) {
     return 0.5;
@@ -189,9 +197,52 @@ map.on("load", async () => {
       .domain([0, d3.max(stations, (station) => station.totalTraffic)])
       .range([0, 25]);
     const stationFlow = d3.scaleQuantize().domain([0, 1]).range([0, 0.5, 1]);
+    const mapShell = document.querySelector(".map-shell");
     const svg = d3.select(".map-overlay");
+    const tooltip = d3.select(".station-tooltip");
 
     let circles = svg.selectAll("circle.station");
+
+    function moveTooltip(event) {
+      const offset = 12;
+      const shellRect = mapShell.getBoundingClientRect();
+      const tooltipNode = tooltip.node();
+      const tooltipWidth = tooltipNode.offsetWidth;
+      const tooltipHeight = tooltipNode.offsetHeight;
+      let x = event.clientX - shellRect.left + offset;
+      let y = event.clientY - shellRect.top + offset;
+
+      if (x + tooltipWidth + offset > shellRect.width) {
+        x = event.clientX - shellRect.left - tooltipWidth - offset;
+      }
+
+      if (y + tooltipHeight + offset > shellRect.height) {
+        y = event.clientY - shellRect.top - tooltipHeight - offset;
+      }
+
+      tooltip.style(
+        "transform",
+        `translate(${Math.max(offset, x)}px, ${Math.max(offset, y)}px)`,
+      );
+    }
+
+    function showTooltip(event, station) {
+      tooltip.html("");
+      tooltip.append("strong").text(station.name);
+
+      const rows = tooltip.append("dl");
+      tooltipRows(station).forEach(([label, value]) => {
+        rows.append("dt").text(label);
+        rows.append("dd").text(value);
+      });
+
+      tooltip.attr("hidden", null);
+      moveTooltip(event);
+    }
+
+    function hideTooltip() {
+      tooltip.attr("hidden", true);
+    }
 
     function updatePositions() {
       circles
@@ -223,6 +274,9 @@ map.on("load", async () => {
         .style("--departure-ratio", (station) =>
           stationDepartureRatio(station, stationFlow),
         )
+        .on("mouseenter", showTooltip)
+        .on("mousemove", moveTooltip)
+        .on("mouseleave", hideTooltip)
         .each(function updateTitle(station) {
           d3.select(this).select("title").text(tooltipText(station));
         });

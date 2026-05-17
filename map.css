@@ -100,6 +100,48 @@ h1 {
   pointer-events: auto;
 }
 
+.station-tooltip {
+  position: absolute;
+  inset: 0 auto auto 0;
+  z-index: 3;
+  max-width: min(18rem, calc(100% - 1.5rem));
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgb(23 32 38 / 0.16);
+  border-radius: 6px;
+  color: #172026;
+  background: rgb(255 255 255 / 0.94);
+  box-shadow: 0 8px 24px rgb(20 34 28 / 0.2);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+.station-tooltip[hidden] {
+  display: none;
+}
+
+.station-tooltip strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.station-tooltip dl {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.1rem 0.75rem;
+  margin: 0;
+}
+
+.station-tooltip dt {
+  color: #5a6870;
+}
+
+.station-tooltip dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+}
+
 .map-status {
   position: absolute;
   inset: 50% auto auto 50%;
